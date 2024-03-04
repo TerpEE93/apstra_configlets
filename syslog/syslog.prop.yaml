@@ -1,0 +1,45 @@
+syslog:
+  archive:
+    files: 10
+    size: 1m
+  files:
+    auth_log:
+    - facility: any
+      priority: none
+    - facility: authorization
+      priority: info
+    - facility: interactive-commands
+      priority: none
+    interactive-commands:
+    - facility: any
+      priority: none
+    - facility: authorization
+      priority: none
+    - facility: interactive-commands
+      priority: info
+    messages:
+    - facility: any
+      priority: info
+    - facility: authorization
+      priority: none
+    - facility: interactive-commands
+      priority: none
+  hosts:
+    172.31.255.110:
+    - facility: any
+      priority: info
+    - facility: authorization
+      priority: none
+    - facility: interactive-commands
+      priority: none
+    172.31.255.115:
+    - facility: any
+      priority: none
+    - facility: authorization
+      priority: info
+    - facility: interactive-commands
+      priority: info
+  is_enabled: true
+  time_format:
+  - millisecond
+  - year

@@ -1,0 +1,51 @@
+{#
+    Configlet to provision syslog services on Junos devices.  Requires the
+    syslog.prop.json and other_mgt_net.prop.json property sets are included
+    in any blueprint that uses this configlet.
+#}
+
+{% set other_ip = None %}
+{% set other_ri = None %}
+
+{% if other_mgt_net is truthy and other_mgt_net.is_enabled %}
+    {% set other_ip = other_mgt_net.other_mgt_ip if other_mgt_net.other_mgt_ip
+       is truthy %}
+    {% set other_ri = other_mgt_net.other_mgt_ri if other_mgt_net.other_mgt_ri
+       is truthy %} 
+{% endif %}
+
+{% set mgt_ip = other_ip if other_ip is truthy else management_ip %}
+{% set mgt_ri = other_ri if other_ri is truthy else 'mgmt_junos' %}
+
+system {
+{% if syslog.is_enabled %}
+    replace: syslog {
+    {% if 'archive' in syslog and syslog.archive is truthy %}
+        archive {%- for k, v in syslog.archive.items() %} {{ k }} {{ v}} {%- endfor %};
+    {%- endif %} 
+    {% if 'time_format' in syslog and syslog.time_format is truthy %}
+        time-format {%- for v in syslog.time_format %} {{ v}} {%- endfor %};
+    {%- endif %} 
+    {% if 'hosts' in syslog and syslog.hosts is truthy %}
+        source-address {{ mgt_ip }};
+        routing-instance {{ mgt_ri }};
+        {% for k, v in syslog.hosts.items()%}
+        host {{ k }} {
+            {% for dict_item in v %}
+            {{ dict_item['facility'] }} {{ dict_item['priority'] }};
+            {% endfor %}
+        }
+        {% endfor %}
+    {% endif %}
+    {% if 'files' in syslog and syslog.files is truthy %}
+        {% for k, v in syslog.files.items()%}
+        file {{ k }} {
+            {% for dict_item in v %}
+            {{ dict_item['facility'] }} {{ dict_item['priority'] }};
+            {% endfor %}
+        }
+        {% endfor %}
+    {% endif %}
+    }
+{% endif %}
+}

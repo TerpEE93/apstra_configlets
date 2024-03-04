@@ -1,0 +1,9 @@
+{% if other_mgt_net is truthy and other_mgt_net.is_enabled %}
+    {% set other_ip = other_mgt_net.other_mgt_ip if other_mgt_net.other_mgt_ip
+       is truthy %}
+    {% set other_ri = other_mgt_net.other_mgt_ri if other_mgt_net.other_mgt_ri
+       is truthy %} 
+{% endif %}
+
+{% set mgt_ip = other_ip if other_ip is truthy else management_ip %}
+{% set mgt_ri = other_ri if other_ri is truthy else 'mgmt_junos' %}

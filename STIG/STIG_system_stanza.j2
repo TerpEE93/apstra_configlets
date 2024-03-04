@@ -1,0 +1,95 @@
+system {
+  login {
+    class AUDITOR {
+      idle-timeout {{ login_idle_to }};
+      permissions [configure view-configuration];
+      allow-configuration "(system syslog)";
+    }
+    class SR_ENGINEER {
+      idle-timeout {{ login_idle_to }};
+      permissions all;
+      deny-configuration "(system syslog)";
+    }
+    class JR_ENGINEER {
+      idle-timeout {{ login_idle_to }};
+      permissions all;
+      deny-configuration "(system syslog)";
+      deny-commands "(file delete)";
+      deny-commands "(request system software)";
+    }
+    class LAST_RESORT {
+      idle-timeout {{ login_idle_to }};
+      permissions all;
+      deny-configuration "(system syslog)";
+      deny-commands "(file delete)";
+    }
+    retry-options {
+      tries-before-disconnect 3;
+      lockout-period 15;
+    }
+    user emergency {
+      uid 2001;
+      class LAST_RESORT;
+      authentication {
+        encrypted-password "{{ emergency_enc_pw }}";
+      }
+    }
+    message "{{ login_motd }}";
+    password {
+      minimum-length {{ pw_min_len }};
+      minimum-upper-cases {{ pw_min_upper }};
+      minimum-lower-cases {{ pw_min_lower }};
+      minimum-numerics {{ pw_min_numeric }};
+      minimum-punctuations {{ pw_min_punct }};
+    }
+  }
+  services {
+    ssh {
+      connection-limit { ssh_conn_limit }};
+      max-sessions-per-connection {{ ssh_max_sess_per_conn }};
+      protocol-version v2;
+      macs [ {% set list1 = ssh_mac_list.split(',') %}{% for i in list1 -%}{{ i }} {%- endfor %} ];
+      ciphers [ {% set list2 = ssh_cipher_list.split(',') %}{% for i in list2 -%}{{ i }} {%- endfor %} ];
+    }
+  }
+  syslog {
+    file security-log {
+      security info;
+    }
+    file firewall-log {
+      firewall info;
+    }
+    file auth-log {
+      authorization info;
+    }
+    file change-log {
+      change-log info;
+    }
+  }
+}
+
+
+#
+# propterty set variables
+#
+
+emergency_enc_pw == $6$TfS4qbyC$6Uvm9nr8vOk8NrYxQ1fJx7Tn8qQMzxZ52B9zxALXmxVfL4KYiYTZUTZeWSMGB3qPXMIAE/hpPmUPXFeMSQOXh.
+login_idle_to == 10
+login_motd == "You are accessing a U.S. Government (USG) Information System (IS) that is provided\nfor USG-authorized use only.\n\nBy using this IS (which includes any device attached to this IS), you consent to the\nfollowing conditions:\n\n-The USG routinely intercepts and monitors communications on this IS for purposes\nincluding, but not limited to, penetration testing, COMSEC monitoring, network\noperations and defense, personnel misconduct (PM), law enforcement (LE), and\ncounterintelligence (CI) investigations.\n\n-At any time, the USG may inspect and seize data stored on this IS.\n\n-Communications using, or data stored on, this IS are not private, are subject to routine\nmonitoring, interception, and search, and may be disclosed or used for any USG-\nauthorized purpose.\n\n-This IS includes security measures (e.g., authentication and access controls) to protect\nUSG interests--not for your personal benefit or privacy.\n\n-Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI\ninvestigative searching or monitoring of the content of privileged communications, or\nwork product, related to personal representation or services by attorneys,\npsychotherapists, or clergy, and their assistants.  Such communications and work product\nare private and confidential.  See User Agreement for details."
+pw_min_len == 15
+pw_min_upper == 1
+pw_min_lower == 1
+pw_min_numeric == 1
+pw_min_punct == 1
+ssh_conn_limit == 10
+ssh_max_sess_per_conn == 5
+ssh_macs == hmac-sha2-256,hmac-sha2-512
+ssh_ciphers == aes256-ctr
+syslog_sec_file == security-log
+syslog_sec_level == info
+syslog_fw_file == firewall-log
+syslog_fw_level == info
+syslog_auth_file == auth-log
+syslog_auth_level == info
+syslog_change_file == change-log
+syslog_change_level == info

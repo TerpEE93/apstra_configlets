@@ -1,0 +1,18 @@
+{
+    "id": "d586661f-e6d6-48c6-b1ce-0f8697abfeb6",
+    "ref_archs": [
+      "two_stage_l3clos"
+    ],
+    "created_at": "2024-02-29T16:10:32.317276Z",
+    "last_modified_at": "2024-02-29T16:10:32.317276Z",
+    "display_name": "SYSLOG on Junos",
+    "generators": [
+      {
+        "config_style": "junos",
+        "template_text": "{#\n    Configlet to provision syslog services on Junos devices.  Requires the\n    syslog.prop.json and other_mgt_net.prop.json property sets are included\n    in any blueprint that uses this configlet.\n#}\n\n{% set other_ip = None %}\n{% set other_ri = None %}\n\n{% if other_mgt_net is truthy and other_mgt_net.is_enabled %}\n    {% set other_ip = other_mgt_net.other_mgt_ip if other_mgt_net.other_mgt_ip\n       is truthy %}\n    {% set other_ri = other_mgt_net.other_mgt_ri if other_mgt_net.other_mgt_ri\n       is truthy %} \n{% endif %}\n\n{% set mgt_ip = other_ip if other_ip is truthy else management_ip %}\n{% set mgt_ri = other_ri if other_ri is truthy else 'mgmt_junos' %}\n\nsystem {\n{% if syslog.is_enabled %}\n    replace: syslog {\n    {% if 'archive' in syslog and syslog.archive is truthy %}\n        archive {%- for k, v in syslog.archive.items() %} {{ k }} {{ v}} {%- endfor %};\n    {%- endif %} \n    {% if 'time_format' in syslog and syslog.time_format is truthy %}\n        time-format {%- for v in syslog.time_format %} {{ v}} {%- endfor %};\n    {%- endif %} \n    {% if 'hosts' in syslog and syslog.hosts is truthy %}\n        source-address {{ mgt_ip }};\n        routing-instance {{ mgt_ri }};\n        {% for k, v in syslog.hosts.items()%}\n        host {{ k }} {\n            {% for dict_item in v %}\n            {{ dict_item['facility'] }} {{ dict_item['priority'] }};\n            {% endfor %}\n        }\n        {% endfor %}\n    {% endif %}\n    {% if 'files' in syslog and syslog.files is truthy %}\n        {% for k, v in syslog.files.items()%}\n        file {{ k }} {\n            {% for dict_item in v %}\n            {{ dict_item['facility'] }} {{ dict_item['priority'] }};\n            {% endfor %}\n        }\n        {% endfor %}\n    {% endif %}\n    }\n{% endif %}\n}",
+        "section": "system",
+        "negation_template_text": "",
+        "filename": ""
+      }
+    ]
+  }

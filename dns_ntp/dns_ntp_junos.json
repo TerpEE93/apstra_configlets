@@ -1,0 +1,18 @@
+{
+    "id": "f4c5be3f-dfc5-42fc-a0d2-ccab6e4f9d20",
+    "ref_archs": [
+      "two_stage_l3clos"
+    ],
+    "created_at": "2024-02-27T19:39:39.205945Z",
+    "last_modified_at": "2024-02-29T12:19:11.670829Z",
+    "display_name": "DNS and NTP on Junos",
+    "generators": [
+      {
+        "config_style": "junos",
+        "template_text": "{#\n    Configlet to provision DNS and NTP on Junos devices.  Requires the\n    dns_ntp.prop.json and other_mgt_net.prop.json property sets are included\n    in any blueprint that uses this configlet.\n#}\n\n{% set other_ip = None %}\n{% set other_ri = None %}\n\n{% if other_mgt_net is truthy and other_mgt_net.is_enabled %}\n    {% set other_ip = other_mgt_net.other_mgt_ip if other_mgt_net.other_mgt_ip\n       is truthy %}\n    {% set other_ri = other_mgt_net.other_mgt_ri if other_mgt_net.other_mgt_ri\n       is truthy %} \n{% endif %}\n\n{% set mgt_ip = other_ip if other_ip is truthy else management_ip %}\n{% set mgt_ri = other_ri if other_ri is truthy else 'mgmt_junos' %}\n\nsystem {\n{# First DNS... #}\n{% if \"domain_name\" in dns and dns.domain_name is truthy %}\n    domain-name {{ dns.domain_name }};\n{% endif %}\n{% if \"domain_search\" in dns and dns.domain_search is truthy %}\n    replace: domain-search [ {% for domain in dns.domain_search %} {{ domain }} {% endfor %} ];\n{% endif %}\n{% if \"server_list\" in dns and dns.server_list is truthy %}\n    replace: name-server {\n    {% for server in dns.server_list %}\n        {{ server }} routing-instance {{ mgt_ri }};\n    {% endfor %}\n    }\n{% endif %}\n{# Now for NTP... #}\n    replace: ntp {\n        source-address {{ mgt_ip }} routing-instance {{ mgt_ri }};\n{% if 'server_list' in ntp %}\n    {% for server in ntp.server_list %}\n        server {{ server }};\n    {% endfor %}\n{% endif %}\n    }\n}\n",
+        "section": "system",
+        "negation_template_text": "",
+        "filename": ""
+      }
+    ]
+  }

@@ -1,0 +1,11 @@
+{% for if_name,if_param in interface.items() %}
+    {% for tags in if_param['tags'] %}
+        {% if tags == "no-rstp-edge" %}
+            {% if if_param['part_of'] != '' %}
+delete protocols rstp interface {{ if_param['part_of'] }} edge
+            {% else %}
+delete protocols rstp interface {{ if_param['intfName'] }} edge
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}

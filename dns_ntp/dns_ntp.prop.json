@@ -1,0 +1,21 @@
+{
+  "dns": {
+      "is_enabled": true,
+      "domain_name": "demo.jnpr.net",
+      "domain_search": [
+          "demo.jnpr.net",
+          "jnpr.net"
+      ],
+    "server_list": [
+      "1.1.1.1",
+      "2.2.2.2"
+    ]
+  },
+  "ntp": {
+      "is_enabled": true,
+      "server_list": [
+        "1.1.1.1",
+        "2.2.2.2"
+      ]
+    }
+  }

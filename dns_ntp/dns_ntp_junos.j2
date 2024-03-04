@@ -1,0 +1,48 @@
+{#
+    Configlet to provision DNS and NTP on Junos devices.  Requires the
+    dns_ntp.prop.json and other_mgt_net.prop.json property sets are included
+    in any blueprint that uses this configlet.
+#}
+
+{% set other_ip = None %}
+{% set other_ri = None %}
+
+{% if other_mgt_net is truthy and other_mgt_net.is_enabled %}
+    {% set other_ip = other_mgt_net.other_mgt_ip if other_mgt_net.other_mgt_ip
+       is truthy %}
+    {% set other_ri = other_mgt_net.other_mgt_ri if other_mgt_net.other_mgt_ri
+       is truthy %} 
+{% endif %}
+
+{% set mgt_ip = other_ip if other_ip is truthy else management_ip %}
+{% set mgt_ri = other_ri if other_ri is truthy else 'mgmt_junos' %}
+
+system {
+{# First DNS... #}
+{% if dns.is_enabled %}
+    {% if "domain_name" in dns and dns.domain_name is truthy %}
+    domain-name {{ dns.domain_name }};
+    {% endif %}
+    {% if "domain_search" in dns and dns.domain_search is truthy %}
+    replace: domain-search [ {% for domain in dns.domain_search %} {{ domain }} {% endfor %} ];
+    {% endif %}
+    {% if "server_list" in dns and dns.server_list is truthy %}
+    replace: name-server {
+        {% for server in dns.server_list %}
+        {{ server }} routing-instance {{ mgt_ri }};
+        {% endfor %}
+    }
+    {% endif %}
+{% endif %}
+{# Now for NTP... #}
+{% if ntp.is_enabled %}
+    replace: ntp {
+        source-address {{ mgt_ip }} routing-instance {{ mgt_ri }};
+    {% if 'server_list' in ntp %}
+        {% for server in ntp.server_list %}
+        server {{ server }};
+        {% endfor %}
+    {% endif %}
+    }
+{% endif %}
+}
