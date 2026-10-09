@@ -4,55 +4,66 @@
             {
                 "service": "DNS",
                 "protocol": "udp",
-                "port": "53",
-                "prefixes": [
-                    "160.91.203.61/32"
+                "ports": [ "53" ],
+                "src_prefixes": [
+                    "8.8.8.8/32",
+                    "1.1.1.1/32"
                 ],
                 "actions": [ "accept" ]
             },
             {
                 "service": "GRPC",
                 "protocol": "udp",
-                "port": "32767",
-                "prefixes": [
-                    "172.30.254.204/32"
+                "ports": [ "32767" ],
+                "src_prefixes": [
+                    "172.31.255.10/32"
+                ],
+                "actions": [ "accept" ]
+            },
+            {
+                "service": "NETCONF",
+                "protocol": "tcp",
+                "ports": [ "830" ],
+                "src_prefixes": [
+                    "172.31.255.0/24",
+                    "172.29.0.0/16",
+                    "10.192.16.62/32"
                 ],
                 "actions": [ "accept" ]
             },
             {
                 "service": "NTP",
                 "protocol": "udp",
-                "port": "123",
-                "prefixes": [
-                    "160.91.194.128/25",
-                    "172.30.254.192/27"
+                "ports": [ "123" ],
+                "src_prefixes": [
+                    "17.253.16.253/32",
+                    "129.6.15.0/24"
                 ],
                 "actions": [ "accept" ]
             },
             {
-                "service": "SNMP_QUERY",
+                "service": "SNMP_ALL",
                 "protocol": "udp",
-                "port": "161",
-                "prefixes": [
-                    "160.91.194.128/25",
-                    "172.30.254.192/27"
+                "ports": [ "161", "162" ],
+                "src_prefixes": [
+                    "10.192.16.62/32",
+                    "172.31.255.0/27"
                 ],
                 "actions": [ "accept" ]
             },
             {
                 "service": "SSH",
                 "protocol": "tcp",
-                "port": "22",
-                "prefixes": [
-                    "172.30.254.192/27",
-                    "160.91.194.128/25",
-                    "160.91.195.32/28",
-                    "160.91.195.64/28"
+                "ports": [ "22" ],
+                "src_prefixes": [
+                    "172.31.255.0/24",
+                    "172.29.0.0/16",
+                    "10.192.16.62/32"
                 ],
                 "actions": [ "accept" ]
             }
         ],
-        "default_actions": [ "discard", "log" ],
+        "default_actions": [ "permit", "syslog" ],
         "icmp_allowed_types":
             [
                 "echo-request",
