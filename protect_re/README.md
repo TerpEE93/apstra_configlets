@@ -33,14 +33,12 @@ following elements:
 ## Caveats
 As always, TEST someplace safe first.  It's very easy to mangle or miss a
 necessary term in the property set, and remember that the default `default`
-action is to deny traffic.  Consider testing with a `[ permit log ]` list
+action is to deny traffic.  Consider testing with a `[ permit syslog ]` list
 of default actions so you can see what traffic is not explicitly permitted
-before the default action, then add what you missed.
-
-This configlet doesn't really handle services that run on both TCP and UDP, or
-services that run across multiple ports (e.g. a port-range).  For now, you'll
-need to create separate term entries in the services list for TCP, UDP, and any
-ports required.
+before the default action, then add what you missed.  This is how the property
+set is configured in the example here.  Just create a local SYSLOG file set
+for facility = firewall and priority = info, and then you can monitor what
+hits the default action term.
 
 Remember that the list of terms is indeed an ordered list!  If term_A must
 appear before term_B to ensure expected behavior, no shadownig, etc., make

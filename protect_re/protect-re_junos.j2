@@ -3,7 +3,7 @@
     the protect-re_junos.prop.json property set is included in any blueprint
     that uses this configlet.
 
-    Last Updated: 2026-10-08
+    Last Updated: 2026-10-09
 #}
 
 {#
@@ -26,6 +26,18 @@ firewall {
                 }
                 then accept;
             }
+            term ALLOW_BFD_from_BGP_PEERS {
+                from {
+                    source-address {
+{% for name, session in bgp_sessions.items() %}
+                        {{ session.dest_ip }};
+{% endfor %}
+                    }
+                    protocol udp;
+                    port 49152;
+                }
+                then accept;
+            }
             term ALLOW_BASIC_ICMP {
                 from {
                     protocol icmp;
@@ -37,21 +49,21 @@ firewall {
 {% for term in protect_re['terms'] %}
             term {{ term['service'] }} {
                 from {
-    {% if term['prefixes'] != '' %}
+    {% if term['src_prefixes'] is defined and term['src_prefixes'] != '' %}
                     source-address {
-        {% for prefix in term['prefixes'] %}
+        {% for prefix in term['src_prefixes'] %}
                         {{ prefix }};
         {% endfor %}
                     }
     {% endif %}
-    {% if term['protocol'] != '' %}
+    {% if term['protocol'] is defined and term['protocol'] != '' %}
                     protocol {{ term['protocol'] }};
     {% endif %}
-    {% if term['port'] != '' %}
-                    port {{ term['port'] }};
+    {% if term['ports'] is defined and term['ports'] != [] %}
+                    port [ {% for port in term['ports'] %} {{ port }} {% endfor %} ];
     {% endif %}
                 }
-    {% if term['actions'] != [] %}
+    {% if term['actions'] is defined and term['actions'] != [] %}
                 then {
         {% for action in term['actions'] %}
                     {{ action }};
@@ -61,7 +73,7 @@ firewall {
             }
 {% endfor %}
             term ELSE__DEFAULT_ACTIONS {
-{% if protect_re['default_actions'] != [] %}
+{% if protect_re['default_actions'] is defined and protect_re['default_actions'] != [] %}
                 then {
     {% for action in protect_re['default_actions'] %}
                     {{ action }};
