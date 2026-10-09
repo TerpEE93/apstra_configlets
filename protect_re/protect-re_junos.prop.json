@@ -1,0 +1,64 @@
+{
+    "protect_re" : { 
+        "terms": [
+            {
+                "service": "DNS",
+                "protocol": "udp",
+                "port": "53",
+                "prefixes": [
+                    "160.91.203.61/32"
+                ],
+                "actions": [ "accept" ]
+            },
+            {
+                "service": "GRPC",
+                "protocol": "udp",
+                "port": "32767",
+                "prefixes": [
+                    "172.30.254.204/32"
+                ],
+                "actions": [ "accept" ]
+            },
+            {
+                "service": "NTP",
+                "protocol": "udp",
+                "port": "123",
+                "prefixes": [
+                    "160.91.194.128/25",
+                    "172.30.254.192/27"
+                ],
+                "actions": [ "accept" ]
+            },
+            {
+                "service": "SNMP_QUERY",
+                "protocol": "udp",
+                "port": "161",
+                "prefixes": [
+                    "160.91.194.128/25",
+                    "172.30.254.192/27"
+                ],
+                "actions": [ "accept" ]
+            },
+            {
+                "service": "SSH",
+                "protocol": "tcp",
+                "port": "22",
+                "prefixes": [
+                    "172.30.254.192/27",
+                    "160.91.194.128/25",
+                    "160.91.195.32/28",
+                    "160.91.195.64/28"
+                ],
+                "actions": [ "accept" ]
+            }
+        ],
+        "default_actions": [ "discard", "log" ],
+        "icmp_allowed_types":
+            [
+                "echo-request",
+                "echo-reply",
+                "time-exceeded",
+                "unreachable"
+            ]
+    }
+}

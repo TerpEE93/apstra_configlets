@@ -1,7 +1,0 @@
-{
-    "other_mgt_net": {
-        "is_enabled": true,
-        "other_mgt_ip": "1.1.1.1",
-        "other_mgt_ri": "my_vrf"
-    }
-}

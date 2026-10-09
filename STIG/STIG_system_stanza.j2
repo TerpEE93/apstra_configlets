@@ -1,71 +1,75 @@
 system {
-  login {
-    class AUDITOR {
-      idle-timeout {{ login_idle_to }};
-      permissions [configure view-configuration];
-      allow-configuration "(system syslog)";
+    replace: root-authentication {
+        encrypted-password "***DISABLED***";
     }
-    class SR_ENGINEER {
-      idle-timeout {{ login_idle_to }};
-      permissions all;
-      deny-configuration "(system syslog)";
+    login {
+        class AUDITOR {
+            idle-timeout {{ login_idle_to }};
+            permissions [configure view-configuration];
+            allow-configuration "(system syslog)";
+        }
+        class SR_ENGINEER {
+            idle-timeout {{ login_idle_to }};
+            permissions all;
+            deny-configuration "(system syslog)";
+        }
+        class JR_ENGINEER {
+            idle-timeout {{ login_idle_to }};
+            permissions all;
+            deny-configuration "(system syslog)";
+            deny-commands "(file delete)";
+            deny-commands "(request system software)";
+        }
+        class LAST_RESORT {
+            idle-timeout {{ login_idle_to }};
+            permissions all;
+            deny-configuration "(system syslog)";
+            deny-commands "(file delete)";
+        }
+        retry-options {
+            tries-before-disconnect 3;
+            lockout-period 15;
+        }
+        user emergency {
+            uid 2001;
+            class LAST_RESORT;
+            authentication {
+                encrypted-password "{{ emergency_enc_pw }}";
+            }
+        }
+        message "{{ login_motd }}";
+        password {
+            minimum-length {{ pw_min_len }};
+            minimum-upper-cases {{ pw_min_upper }};
+            minimum-lower-cases {{ pw_min_lower }};
+            minimum-numerics {{ pw_min_numeric }};
+            minimum-punctuations {{ pw_min_punct }};
+        }
     }
-    class JR_ENGINEER {
-      idle-timeout {{ login_idle_to }};
-      permissions all;
-      deny-configuration "(system syslog)";
-      deny-commands "(file delete)";
-      deny-commands "(request system software)";
+    services {
+        ssh {
+            connection-limit {{ ssh_conn_limit }};
+            max-sessions-per-connection {{ ssh_max_sess_per_conn }};
+            protocol-version v2;
+            root-login deny;
+            macs [ {% set list1 = ssh_mac_list.split(',') %}{% for i in list1 -%} {{ i }} {%- endfor %} ];
+            ciphers [ {% set list2 = ssh_cipher_list.split(',') %}{% for i in list2 -%} {{ i }} {%- endfor %} ];
+        }
     }
-    class LAST_RESORT {
-      idle-timeout {{ login_idle_to }};
-      permissions all;
-      deny-configuration "(system syslog)";
-      deny-commands "(file delete)";
-    }
-    retry-options {
-      tries-before-disconnect 3;
-      lockout-period 15;
-    }
-    user emergency {
-      uid 2001;
-      class LAST_RESORT;
-      authentication {
-        encrypted-password "{{ emergency_enc_pw }}";
-      }
-    }
-    message "{{ login_motd }}";
-    password {
-      minimum-length {{ pw_min_len }};
-      minimum-upper-cases {{ pw_min_upper }};
-      minimum-lower-cases {{ pw_min_lower }};
-      minimum-numerics {{ pw_min_numeric }};
-      minimum-punctuations {{ pw_min_punct }};
-    }
-  }
-  services {
-    ssh {
-      connection-limit { ssh_conn_limit }};
-      max-sessions-per-connection {{ ssh_max_sess_per_conn }};
-      protocol-version v2;
-      macs [ {% set list1 = ssh_mac_list.split(',') %}{% for i in list1 -%}{{ i }} {%- endfor %} ];
-      ciphers [ {% set list2 = ssh_cipher_list.split(',') %}{% for i in list2 -%}{{ i }} {%- endfor %} ];
-    }
-  }
-  syslog {
-    file security-log {
-      security info;
-    }
-    file firewall-log {
-      firewall info;
-    }
-    file auth-log {
-      authorization info;
-    }
-    file change-log {
-      change-log info;
-    }
-  }
+    syslog {
+        file security-log {
+            security info;
+        }
+        file firewall-log {
+            firewall info;
+        }
+        file auth-log {
+            authorization info;
+        }
+        file change-log {
+            change-log info;
+        }
+    }  
 }
 
 

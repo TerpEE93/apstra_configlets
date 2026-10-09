@@ -24,4 +24,5 @@ are named accordingly:
 | `<configlet>_<nos>.json` | JSON formatted configlet for import       |
 | `<configlet>.prop.json`  | JSON formatted property set               |
 | `<configlet>.prop.yaml`  | YAML formatted property set               |
-
+| `README.md`              | The relevant README for the configlet     |
+| `changelog.md`           | The changelog.  What did you think?       |
